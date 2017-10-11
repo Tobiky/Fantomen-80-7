@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,12 +20,15 @@ namespace Basic_Pathfinder
         Texture2D defaultTexture;
         Color defaultColor;
         Pathfinder pf;
+        LinkedList<GridNode> pfPath;
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             Window.AllowUserResizing = false;
+            graphics.PreferredBackBufferHeight = 100;
+            graphics.PreferredBackBufferWidth = 100;
         }
 
         /// <summary>
@@ -42,11 +45,14 @@ namespace Basic_Pathfinder
             MapData.Obstacles = new LinkedList<Rectangle>();
 
             var tempRand = new Random();
-            int tempInt = Window.ClientBounds.Bottom / new Random().Next(1, Window.ClientBounds.Bottom / new Random().Next(0,35));
-            for (int i = 0; i < tempInt; i++)
-                MapData.Obstacles.AddLast(new Rectangle(tempRand.Next(0, Window.ClientBounds.Right), tempRand.Next(0, Window.ClientBounds.Bottom), 30, 12));
+            //int tempInt = Window.ClientBounds.Bottom / new Random().Next(1, Window.ClientBounds.Bottom / new Random().Next(1,101));
+            //for (int i = 0; i < tempInt; i++)
+            //    MapData.Obstacles.AddLast(new Rectangle(tempRand.Next(0, Window.ClientBounds.Right), tempRand.Next(0, Window.ClientBounds.Bottom), 30, 12));
+            MapData.Obstacles.AddLast(new Rectangle(tempRand.Next(50, 150), tempRand.Next(50,150), 30, 12));
 
-            pf = new Pathfinder(new Point(Window.ClientBounds.Left, Window.ClientBounds.Bottom), new Point(Window.ClientBounds.Right, Window.ClientBounds.Top));
+            MapData.Start = new Point(1, 99);
+            MapData.Goal = new Point(99, 1);
+            pf = new Pathfinder(MapData.Start, MapData.Goal);
 
             base.Initialize();
         }
@@ -82,6 +88,8 @@ namespace Basic_Pathfinder
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            pfPath = pf.AStar();//.Result;
+
             // TODO: Add your update logic here
 
             base.Update(gameTime);
@@ -98,6 +106,8 @@ namespace Basic_Pathfinder
             spriteBatch.Begin();
             foreach (var obst in MapData.Obstacles)
                 spriteBatch.Draw(defaultTexture, obst, defaultColor);
+            foreach (var node in pfPath)
+                spriteBatch.Draw(defaultTexture, new Rectangle(node.Location.Cordinates, new Point(1, 1)), new Color(0, 161, 255));
 
             spriteBatch.End();
             // TODO: Add your drawing code here
