@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,6 +26,7 @@ namespace Basic_Pathfinder
             Location = location;
             g = parrent.GValue + Extensions.Pyth(parrent, this);
             CalH();
+            f = g + h;
         }
         public GridNode(GridNode parrent, int x, int y, bool walkable)
         {
@@ -33,6 +34,7 @@ namespace Basic_Pathfinder
             Location = new GridPoint(x, y, walkable);
             g = parrent.GValue + Extensions.Pyth(parrent, this);
             CalH();
+            f = g + h;
         }
         public GridNode(GridNode parrent, Point cordinates, bool walkable)
         {
@@ -40,6 +42,7 @@ namespace Basic_Pathfinder
             Location = new GridPoint(cordinates, walkable);
             g = parrent.GValue + Extensions.Pyth(parrent, this);
             CalH();
+            f = g + h;
         }
         public GridNode(GridNode parrent, int x, int y)
         {
@@ -47,6 +50,7 @@ namespace Basic_Pathfinder
             Location = new GridPoint(x, y);
             g = parrent.GValue + Extensions.Pyth(parrent, this);
             CalH();
+            f = g + h;
         }
         public GridNode(GridNode parrent, Point cordinates)
         {
@@ -54,6 +58,13 @@ namespace Basic_Pathfinder
             Location = new GridPoint(cordinates);
             g = parrent.GValue + Extensions.Pyth(parrent, this);
             CalH();
+            f = g + h;
+        }
+        public GridNode(Point startGoalPoint)
+        {
+            Parrent = null;
+            Location = new GridPoint(startGoalPoint, true);
+            f = g = 0;
         }
 
         public LinkedListNode<GridNode> LLNode { get => new LinkedListNode<GridNode>(this); }
