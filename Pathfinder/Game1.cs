@@ -22,13 +22,22 @@ namespace Basic_Pathfinder
         Pathfinder pf;
         LinkedList<GridNode> pfPath;
         SpriteFont sf;
+        int time;
+
+        //RenderTarget2D target;
+        
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+
+
+            //target = new RenderTarget2D(GraphicsDevice, MapData.Screen.Width, MapData.Screen.Height);
+
             Window.AllowUserResizing = false;
-            graphics.PreferredBackBufferHeight = 51;
-            graphics.PreferredBackBufferWidth = 51;
+            graphics.PreferredBackBufferHeight = 200;
+            graphics.PreferredBackBufferWidth = 200;
             MapData.Screen = new Rectangle(0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
         }
 
@@ -45,19 +54,26 @@ namespace Basic_Pathfinder
 
             MapData.Obstacles = new LinkedList<Rectangle>();
 
-            var tempRand = new Random();
-            int tempInt = Window.ClientBounds.Bottom / new Random().Next(1, Window.ClientBounds.Bottom / new Random().Next(1,101));
+            //var tempRand = new Random();
+            //int tempInt = Window.ClientBounds.Bottom / new Random().Next(1, Window.ClientBounds.Bottom / new Random().Next(1,101));
             //for (int i = 0; i < tempInt; i++)
             //    MapData.Obstacles.AddLast(new Rectangle(tempRand.Next(0, Window.ClientBounds.Right), tempRand.Next(0, Window.ClientBounds.Bottom), 30, 12));
             //MapData.Obstacles.AddLast(new Rectangle(tempRand.Next(0, Window.ClientBounds.Right), tempRand.Next(0, Window.ClientBounds.Bottom), 30, 12));
             //MapData.Obstacles.AddLast(new Rectangle(tempRand.Next(0, Window.ClientBounds.Right), tempRand.Next(0, Window.ClientBounds.Bottom), 30, 12));
             //MapData.Obstacles.AddLast(new Rectangle(tempRand.Next(0, Window.ClientBounds.Right), tempRand.Next(0, Window.ClientBounds.Bottom), 30, 12));
-            MapData.Obstacles.AddLast(new Rectangle(0, 2, 10, 10));
-            MapData.Start = new Point(0, 0);
-            MapData.Goal = new Point(50, 50);
-            pf = new Pathfinder(MapData.Start, MapData.Goal);
+            Func<int, int> nodes = n => n * 5 + n - 1;
+            Func<int, int, Point> placement = (x, y) => new Point(x*6, y*6);
+            MapData.Obstacles.AddLast(new Rectangle(6, 0, 5, nodes(2)));
+            MapData.Obstacles.AddLast(new Rectangle(0, 18, nodes(8), 5));
+            MapData.Start = placement(0, 0);
+            MapData.Goal = placement(13, 13); //3 4
+            pf = new Pathfinder(MapData.Start, MapData.Goal, 5);
 
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
             pfPath = pf.AStar().Result;//.Result;
+            sw.Stop();
+            time = sw.Elapsed.Seconds;
 
             base.Initialize();
         }
@@ -110,20 +126,39 @@ namespace Basic_Pathfinder
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             spriteBatch.Begin();
-            spriteBatch.DrawString(sf, $"OpenLLGN:{pf.OpenLLGN.Count}\nClosedLLGN:{pf.ClosedLLGN.Count}", new Vector2(0, 150), new Color(255,255,255));
+            foreach (var node in pf.OpenLLGN)
+                spriteBatch.Draw(defaultTexture, new Rectangle(node.Location.Cordinates, new Point(5, 5)), new Color(200, 200, 200));
+            foreach (var node in pf.ClosedLLGN)
+                spriteBatch.Draw(defaultTexture, new Rectangle(node.Location.Cordinates, new Point(5, 5)), new Color(200, 200, 200));
+
+            LinkedList<GridNode> path = Path(pf.ClosedLLGN);
+            foreach (var node in path)
+                spriteBatch.Draw(defaultTexture, new Rectangle(node.Location.Cordinates, new Point(5, 5)), new Color(255, 255, 255));
+            spriteBatch.DrawString(sf, $"OpenLLGN:{pf.OpenLLGN.Count}\nClosedLLGN:{pf.ClosedLLGN.Count}\nPath:{path.Count}\nTime:{time}s", new Vector2(0, 125), new Color(255,255,255));
+
             foreach (var obst in MapData.Obstacles)
                 spriteBatch.Draw(defaultTexture, obst, defaultColor);
-            foreach (var node in pf.OpenLLGN)
-                spriteBatch.Draw(defaultTexture, new Rectangle(node.Location.Cordinates, new Point(1, 1)), new Color(200, 200, 200));
-            foreach (var node in pfPath)
-                spriteBatch.Draw(defaultTexture, new Rectangle(node.Location.Cordinates, new Point(1, 1)), new Color(255, 255, 255));
-            spriteBatch.Draw(defaultTexture, new Rectangle(MapData.Start, new Point(5, 5)), new Color(0, 0, 0));
-            spriteBatch.Draw(defaultTexture, new Rectangle(MapData.Goal, new Point(5, 5)), new Color(0, 0, 0));
+
+
+            spriteBatch.Draw(defaultTexture, new Rectangle(MapData.Start, new Point(5, 5)), new Color(0, 255, 0));
+            spriteBatch.Draw(defaultTexture, new Rectangle(MapData.Goal, new Point(5, 5)), new Color(255, 0, 0));
 
             spriteBatch.End();
             // TODO: Add your drawing code here
 
             base.Draw(gameTime);
+        }
+
+        private LinkedList<GridNode> Path(LinkedList<GridNode> closedList)
+        {
+            var path = new LinkedList<GridNode>();
+            var nodeToCheck = closedList.Last();
+            while (nodeToCheck.HasParent)
+            {
+                path.AddFirst(nodeToCheck);
+                nodeToCheck = nodeToCheck.Parrent;
+            }
+            return path;
         }
     }
 }

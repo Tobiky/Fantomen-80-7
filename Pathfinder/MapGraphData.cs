@@ -15,6 +15,7 @@ namespace Basic_Pathfinder
         public float HValue { get; } = 0;
         public float FValue { get; } = 0;
 
+        public bool HasParent => Parrent != null;
         public GridNode Parrent { get; private set; }
         public GridPoint Location { get; private set; }
 
