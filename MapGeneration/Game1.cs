@@ -13,13 +13,8 @@ namespace GymnasieArbete1
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        //Risk risk;
-        //Coordinates[ ,] coordinateArray = new Coordinates[20, 20];
-        List<Risk> riskList = new List<Risk>();
-        Random r = new Random();
-        List<Coordinates> coordinateList = new List<Coordinates>();
-        Texture2D startPoint;
-        Texture2D goalPoint;
+        Grid[ ,] riskArray = new Grid[20, 20];                           //Enter risks at various points
+        Random r = new Random();                                    // Random variable
 
         public Game1()
         {
@@ -37,24 +32,53 @@ namespace GymnasieArbete1
 
         protected override void LoadContent()
         {
-            spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            for (int i = 0; i < 20; i++)                                            //Divides the window into a grid with 40px sized squares
+            spriteBatch = new SpriteBatch(GraphicsDevice); 
+                     
+            //todo skrv 20 som längeden av riskarray i den första (getlength(0))
+            for (int x = 0; x < 20; x++)                            
             {
-                for (int j = 0; j < 20; j++)
+                for (int y = 0; y < 20; y++)
                 {
-                    //coordinateArray[i, j] = new Coordinates
-                    coordinateList.Add(new Coordinates(i, j));
+                    riskArray[x, y] = new Grid(x, y);                           // Creates an empty grid block for every coordinate
                 }
             }
 
-            for (int i = 0; i < 50; i++)                                            //Generates all risks at coordinates from coordinatesList
+            // Start and Goal point generator
+            int tempInt = r.Next(1, 4);
+            int temp1 = r.Next(0, 19);
+            int temp2 = r.Next(0, 19);
+            switch (tempInt)
+                {
+                case 1:                                                                              // Start is left, goal is right
+                    StartGoalPoint(0, 19, temp1, temp2);
+                    break;
+                case 2:                                                                             // Start is right, goal is left
+                    StartGoalPoint(19, 0, temp1, temp2);
+                    break;
+                case 3:                                                                             // Start is top, goal is bottom
+                    StartGoalPoint(temp1, temp2, 0, 19);
+                    break;
+                case 4:                                                                             // Start is bottom, goal is top          
+                    StartGoalPoint(temp1, temp2, 19, 0);
+                    break;
+            }
+
+            for (int i = 0; i < 100; i++)
             {
-                int tempPos = r.Next(0, coordinateList.Count());
+                bool flag = true;
 
-                riskList.Add(new Risk(Content.Load<Texture2D>("Risk"), coordinateList[tempPos].X, coordinateList[tempPos].Y)); 
-
-                coordinateList.RemoveAt(tempPos);
+                while (flag == true)                    // Randomizes a location to place a risk and checks if it is occupies or not. Does so until an available spot has been found
+                {
+                    int tempX = r.Next(0, 20);         // Randomizes an X position for a risk
+                    int tempY = r.Next(0, 20);         // Randomizes a Y position for a risk
+                    if (riskArray[tempX, tempY].IsRisk == false && riskArray[tempX, tempY].IsStart == false && riskArray[tempX, tempY].IsGoal == false)
+                    {
+                        riskArray[tempX, tempY].IsRisk = true;
+                        riskArray[tempX, tempY].Texture = Content.Load<Texture2D>("Empty");
+                        riskArray[tempX, tempY].Color = Color.DarkRed;
+                        flag = false;
+                    }
+                }
             }
         }
 
@@ -75,16 +99,31 @@ namespace GymnasieArbete1
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            spriteBatch.Begin();
+            spriteBatch.Begin();                                        // Begins drawing process
 
-            for(int i = 0; i < 50; i++)
+            for (int i = 0; i < 20; i++)
             {
-                riskList[i].Draw(spriteBatch);
+                for (int j = 0; j < 20; j++)
+                {
+                    if (riskArray[i, j].Texture != null)                    // Only draws object if a texture is available to avoid crashing
+                    {
+                        riskArray[i, j].Draw(spriteBatch);
+                    }
+                }
             }
+            spriteBatch.End();                                          // Ends drawing process
+        }
 
-            spriteBatch.End();
+        void StartGoalPoint(int x1, int x2, int y1, int y2) 
+        {
+            riskArray[x1, y1].Texture = Content.Load<Texture2D>("Empty");
+            riskArray[x1, y1].Color = Color.DarkSlateGray;
+            riskArray[x1, y1].IsStart = true;
+            riskArray[x2, y2].Texture = Content.Load<Texture2D>("Empty");
+            riskArray[x2, y2].Color = Color.DarkOliveGreen;
+            riskArray[x2, y2].IsGoal = true;
         }
     }
 }
 
-//Perlin noise
+//Perin noise
