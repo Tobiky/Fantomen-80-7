@@ -23,5 +23,24 @@ namespace Basic_Pathfinder
                 Math.Pow(MathHelper.Distance(a.X, b.X), 2) +
                 Math.Pow(MathHelper.Distance(a.Y, b.Y), 2)
                 );
+        public static GridNode LowestNode(this GridNode[] nodes)
+        {
+            GridNode lowNode = nodes[0];
+            foreach (var node in nodes)
+                if (node.FValue < lowNode.FValue)
+                    lowNode = node;
+            return lowNode;
+        }
+        public static GridNode LowestNode(this LinkedList<GridNode> nodes)
+        {
+            GridNode lowNode = nodes.ElementAt(0);
+            foreach (var node in nodes)
+                if (node.FValue < lowNode.FValue)
+                    lowNode = node;
+            return lowNode;
+        }
+        public static bool SameValues(this GridPoint a, GridPoint b) =>
+            a.Walkable && b.Walkable && a.Cordinates.X == b.Cordinates.X && a.Cordinates.Y == b.Cordinates.Y;
+        
     }
 }

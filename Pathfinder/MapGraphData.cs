@@ -11,55 +11,45 @@ namespace Basic_Pathfinder
 {
     public class GridNode
     {
-        float g;
-        float h;
-        float f;
-        public float GValue { get => g; }
-        public float HValue { get => h; }
-        public float FValue { get => f; }
+        public float GValue { get; } = 0;
+        public float HValue { get; } = 0;
+        public float FValue { get; } = 0;
+
         public GridNode Parrent { get; private set; }
         public GridPoint Location { get; private set; }
+
+        public GridNode(Point startGoalPoint)
+        {
+            Parrent = null;
+            Location = new GridPoint(startGoalPoint, true);
+        }
 
         public GridNode(GridNode parrent, GridPoint location)
         {
             Parrent = parrent;
             Location = location;
-            g = parrent.GValue + Extensions.Pyth(parrent, this);
-            CalH();
+
+            GValue = parrent.GValue + Extensions.Pyth(parrent, this);
+            HValue = Extensions.Pyth(Location.Cordinates, MapData.Goal);
+            FValue = GValue + HValue;
+
         }
+
         public GridNode(GridNode parrent, int x, int y, bool walkable)
-        {
-            Parrent = parrent;
-            Location = new GridPoint(x, y, walkable);
-            g = parrent.GValue + Extensions.Pyth(parrent, this);
-            CalH();
-        }
+            : this(parrent, new GridPoint(x, y, walkable)) { }
+
         public GridNode(GridNode parrent, Point cordinates, bool walkable)
-        {
-            Parrent = parrent;
-            Location = new GridPoint(cordinates, walkable);
-            g = parrent.GValue + Extensions.Pyth(parrent, this);
-            CalH();
-        }
+            : this(parrent, new GridPoint(cordinates, walkable)) { }
+
         public GridNode(GridNode parrent, int x, int y)
-        {
-            Parrent = parrent;
-            Location = new GridPoint(x, y);
-            g = parrent.GValue + Extensions.Pyth(parrent, this);
-            CalH();
-        }
+            : this(parrent, new GridPoint(x, y)) { }
+
         public GridNode(GridNode parrent, Point cordinates)
-        {
-            Parrent = parrent;
-            Location = new GridPoint(cordinates);
-            g = parrent.GValue + Extensions.Pyth(parrent, this);
-            CalH();
-        }
+            : this(parrent, new GridPoint(cordinates)) { }
+        //public LinkedListNode<GridNode> LLNode => new LinkedListNode<GridNode>(this);
 
-        public LinkedListNode<GridNode> LLNode { get => new LinkedListNode<GridNode>(this); }
 
-        public float CalH() =>
-            h = Extensions.Pyth(Location.Cordinates, MapData.Goal);
+        public override string ToString() => $"GValue : {GValue}, FValue {FValue}, HValue {HValue}, GridPoint {Location.ToString()}";
     }
 
     public struct GridPoint
@@ -90,5 +80,9 @@ namespace Basic_Pathfinder
 
         public static GridPoint operator +(GridPoint a, GridPoint b) =>
             new GridPoint(a.Cordinates.CombinePoints(b.Cordinates), a.Walkable);
+
+        public override string ToString() => $"Location {Cordinates.ToString()}, Walkable {Walkable.ToString()}";
+
+
     }
 }
