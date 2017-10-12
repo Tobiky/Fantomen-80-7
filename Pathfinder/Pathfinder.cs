@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +22,9 @@ namespace Basic_Pathfinder
         LinkedList<GridNode> openLLGN;
         LinkedList<GridNode> closedLLGN;
 
+        public LinkedList<GridNode> OpenLLGN => openLLGN;
+        public LinkedList<GridNode> ClosedLLGN => closedLLGN;
+
         public Pathfinder(Point start, Point goal)
         {
             this.start = start;
@@ -32,48 +35,59 @@ namespace Basic_Pathfinder
             openLLGN.AddLast(new GridNode(start));
         }
 
-        public LinkedList<GridNode> AStar() //Task<LinkedList<GridNode>>
+        public Task<LinkedList<GridNode>> AStar() //Task<LinkedList<GridNode>>
         {
-            //var tcs = new TaskCompletionSource<LinkedList<GridNode>>();
-            while (openLLGN.Count != 0 || openLLGN != null)
+            var tcs = new TaskCompletionSource<LinkedList<GridNode>>();
+            while (openLLGN.Count != 0 && openLLGN != null)
             {
-                var orderedNodes = openLLGN.OrderBy(LLGNode => LLGNode.FValue).ToArray();
-                var leastNode = orderedNodes.First();
+                var leastNode = openLLGN.LowestNode();
                 openLLGN.Remove(leastNode);
                 var successors = SuccessorNodes(leastNode);
                 foreach (var successor in successors)
                 {
                     if (successor.Location.Cordinates == goal)
                     {
-                        //tcs.SetResult(closedLLGN);
-                        return closedLLGN; //tcs.Task;
+                        tcs.SetResult(closedLLGN);
+                        return tcs.Task;
                     }
-                    if (openLLGN.Any(node => node.Location.Cordinates == successor.Location.Cordinates && node.FValue < successor.FValue))
+
+                    Func<GridNode, bool> containsWhatever = node => 
+                        node.Location.Cordinates == successor.Location.Cordinates && node.FValue < successor.FValue;
+
+                    if (openLLGN.Any(containsWhatever) || closedLLGN.Any(containsWhatever))
                         continue;
-                    if (closedLLGN.Any(node => node.Location.Cordinates == successor.Location.Cordinates && node.FValue < successor.FValue))
-                        continue;
+
                     openLLGN.AddLast(successor);
                 }
                 closedLLGN.AddLast(leastNode);
             }
-            //tcs.SetResult(closedLLGN);
-            return closedLLGN; //tcs.Task;
+            return tcs.Task;
         }
 
         private GridNode[] SuccessorNodes(GridNode parent)
         {
-            List<GridNode> nodes = new List<GridNode>();
+            List<GridNode> nodes = new List<GridNode>(8);
             Point pos = parent.Location.Cordinates;
+
             for (int y = -1; y < 2; y++)
+            {
                 for (int x = -1; x < 2; x++)
                 {
                     var location = new Point(pos.X + x, pos.Y + y);
+                    if (!MapData.Screen.Contains(location) || location == parent.Location.Cordinates)
+                        continue;
+
                     bool walkable = !MapData.Obstacles.Any(obs => obs.Contains(location));
-                    var tempGridNode = new GridPoint(location, walkable);
+
                     if (walkable)
-                        nodes.Add(new GridNode(parent, tempGridNode));
+                    {
+                        var tempPoint = new GridPoint(location, walkable);
+                        var tempNode = new GridNode(parent, tempPoint);
+                        nodes.Add(tempNode);
+                    }
                 }
-            nodes.Remove(parent);
+            }
+
             return nodes.ToArray();
         }
     }
