@@ -39,7 +39,7 @@ namespace Basic_Pathfinder
             openLLGN.AddLast(new GridNode(start));
         }
 
-        public async Task<LinkedList<GridNode>> AStar() //Task<LinkedList<GridNode>>
+        public async Task<LinkedList<GridNode>> AStar()
         {
             var tcs = new TaskCompletionSource<LinkedList<GridNode>>();
             while (openLLGN.Count != 0 && openLLGN != null)
@@ -56,7 +56,7 @@ namespace Basic_Pathfinder
                     }
 
                     Func<GridNode, bool> containsWhatever = node =>
-                        node.Location.Cordinates == successor.Location.Cordinates && node.FValue < successor.FValue;
+                        node.Location.Cordinates == successor.Location.Cordinates;
 
                     if (openLLGN.Any(containsWhatever) || closedLLGN.Any(containsWhatever))
                         continue;
@@ -69,7 +69,9 @@ namespace Basic_Pathfinder
         }
 
         private Task<GridNode[]> SuccessorNodes(GridNode parent)
-        {
+        { 
+            //TODO: Fix this nasty ass shit
+            //-------------------------------------------------------------------------------------------------------------FIX---------------------------------------------------------------------
             var tcs = new TaskCompletionSource<GridNode[]>();
             List<GridNode> nodes = new List<GridNode>(4);
             Point pos = parent.Location.Cordinates;

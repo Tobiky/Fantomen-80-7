@@ -16,16 +16,16 @@ namespace Basic_Pathfinder
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-
+        int lowerRight;
         Texture2D defaultTexture;
-        Color defaultColor;
         Pathfinder pf;
         LinkedList<GridNode> pfPath;
         SpriteFont sf;
         int time;
+        int size;
 
         //RenderTarget2D target;
-        
+
 
         public Game1()
         {
@@ -34,11 +34,11 @@ namespace Basic_Pathfinder
 
 
             //target = new RenderTarget2D(GraphicsDevice, MapData.Screen.Width, MapData.Screen.Height);
-
+            size = 816;
             Window.AllowUserResizing = false;
-            graphics.PreferredBackBufferHeight = 200;
-            graphics.PreferredBackBufferWidth = 200;
-            MapData.Screen = new Rectangle(0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+            graphics.PreferredBackBufferHeight = size;
+            graphics.PreferredBackBufferWidth = size;
+            MapData.Screen = new Rectangle(0, 0, size, size);
         }
 
         /// <summary>
@@ -47,33 +47,62 @@ namespace Basic_Pathfinder
         /// related content.  Calling base.Initialize will enumerate through any components
         /// and initialize them as well.
         /// </summary>
+        private void GenerateWorld()
+        {
+            var tempRand = new Random();
+            int tempInt = Window.ClientBounds.Bottom / new Random().Next(1, Window.ClientBounds.Bottom / new Random().Next(1, 1001));
+            var rSize = new Point(5, 5);
+            for (int i = 0; i < tempInt; i++)
+            {
+                var p = new Point(tempRand.Next(0, Window.ClientBounds.Right), tempRand.Next(0, Window.ClientBounds.Bottom));
+                Rectangle r;
+                if (p.X % 6 != 0 || p.Y % 6 != 0)
+                {
+                    i--;
+                    continue;
+                }
+                if (p == MapData.Goal)
+                {
+                    i--;
+                    continue;
+                }
+                if (new Random().Next(1, 101) == 1)
+                    r = new Rectangle(p, new Point(35,35));
+                else
+                {
+                    r = new Rectangle(p, rSize);
+                    if (MapData.Obstacles.Any(obs => obs.Intersects(r)))
+                    {
+                        i--;
+                        continue;
+                    }
+                }
+
+                MapData.Obstacles.AddLast(r);
+            }
+        }
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-            defaultColor = new Color(new Random().Next(0, 256), new Random().Next(0, 256), new Random().Next(0, 256));
-
             MapData.Obstacles = new LinkedList<Rectangle>();
-
-            //var tempRand = new Random();
-            //int tempInt = Window.ClientBounds.Bottom / new Random().Next(1, Window.ClientBounds.Bottom / new Random().Next(1,101));
-            //for (int i = 0; i < tempInt; i++)
-            //    MapData.Obstacles.AddLast(new Rectangle(tempRand.Next(0, Window.ClientBounds.Right), tempRand.Next(0, Window.ClientBounds.Bottom), 30, 12));
-            //MapData.Obstacles.AddLast(new Rectangle(tempRand.Next(0, Window.ClientBounds.Right), tempRand.Next(0, Window.ClientBounds.Bottom), 30, 12));
-            //MapData.Obstacles.AddLast(new Rectangle(tempRand.Next(0, Window.ClientBounds.Right), tempRand.Next(0, Window.ClientBounds.Bottom), 30, 12));
-            //MapData.Obstacles.AddLast(new Rectangle(tempRand.Next(0, Window.ClientBounds.Right), tempRand.Next(0, Window.ClientBounds.Bottom), 30, 12));
             Func<int, int> nodes = n => n * 5 + n - 1;
-            Func<int, int, Point> placement = (x, y) => new Point(x*6, y*6);
-            MapData.Obstacles.AddLast(new Rectangle(6, 0, 5, nodes(2)));
-            MapData.Obstacles.AddLast(new Rectangle(0, 18, nodes(8), 5));
+            Func<int, int, Point> placement = (x, y) => new Point(x * 6, y * 6);
+
+
             MapData.Start = placement(0, 0);
-            MapData.Goal = placement(13, 13); //3 4
+            MapData.Goal = placement(size/6-1, size/6-1); //3 4
+
+            GenerateWorld();
+
+            MapData.Obstacles.AddLast(new Rectangle(408, 102, 5, nodes(100)));
+            MapData.Obstacles.AddLast(new Rectangle(0, 18, nodes(8), 5));
+
             pf = new Pathfinder(MapData.Start, MapData.Goal, 5);
 
-            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
+            //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            //sw.Start();
             pfPath = pf.AStar().Result;//.Result;
-            sw.Stop();
-            time = sw.Elapsed.Seconds;
+            //sw.Stop();
+            //time = sw.Elapsed.Seconds;
 
             base.Initialize();
         }
@@ -88,7 +117,6 @@ namespace Basic_Pathfinder
             spriteBatch = new SpriteBatch(GraphicsDevice);
             defaultTexture = Content.Load<Texture2D>("whitesquare");
             sf = Content.Load<SpriteFont>("textStuff");
-            // TODO: use this.Content to load your game content here
         }
 
         /// <summary>
@@ -97,7 +125,7 @@ namespace Basic_Pathfinder
         /// </summary>
         protected override void UnloadContent()
         {
-            // TODO: Unload any non ContentManager content here
+
         }
 
         /// <summary>
@@ -110,9 +138,14 @@ namespace Basic_Pathfinder
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            
-
-            // TODO: Add your update logic here
+            KeyboardState state = Keyboard.GetState();
+            if (state.IsKeyDown(Keys.Enter))
+            {
+                MapData.Obstacles.Clear();
+                GenerateWorld();
+                pf = new Pathfinder(MapData.Start, MapData.Goal, 5);
+                pfPath = pf.AStar().Result;
+            }
 
             base.Update(gameTime);
         }
@@ -134,17 +167,16 @@ namespace Basic_Pathfinder
             LinkedList<GridNode> path = Path(pf.ClosedLLGN);
             foreach (var node in path)
                 spriteBatch.Draw(defaultTexture, new Rectangle(node.Location.Cordinates, new Point(5, 5)), new Color(255, 255, 255));
-            spriteBatch.DrawString(sf, $"OpenLLGN:{pf.OpenLLGN.Count}\nClosedLLGN:{pf.ClosedLLGN.Count}\nPath:{path.Count}\nTime:{time}s", new Vector2(0, 125), new Color(255,255,255));
+            //spriteBatch.DrawString(sf, $"OpenLLGN:{pf.OpenLLGN.Count}\nClosedLLGN:{pf.ClosedLLGN.Count}\nPath:{path.Count}\nTime:{time}s", new Vector2(0, 125), new Color(255, 255, 255));
 
             foreach (var obst in MapData.Obstacles)
-                spriteBatch.Draw(defaultTexture, obst, defaultColor);
+                spriteBatch.Draw(defaultTexture, obst, Color.Black);
 
 
             spriteBatch.Draw(defaultTexture, new Rectangle(MapData.Start, new Point(5, 5)), new Color(0, 255, 0));
             spriteBatch.Draw(defaultTexture, new Rectangle(MapData.Goal, new Point(5, 5)), new Color(255, 0, 0));
 
             spriteBatch.End();
-            // TODO: Add your drawing code here
 
             base.Draw(gameTime);
         }
