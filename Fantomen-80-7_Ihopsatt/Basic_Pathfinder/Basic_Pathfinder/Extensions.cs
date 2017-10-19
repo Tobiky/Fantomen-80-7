@@ -18,8 +18,6 @@ namespace Basic_Pathfinder
 
         public static float Pyth(GridNode a, GridNode b) =>
             Pyth(a.Location, b.Location);
-        public static float Pyth(GridPoint a, GridPoint b) =>
-            Pyth(a.Cordinates, b.Cordinates);
         public static float Pyth(Point a, Point b) =>
             (float)Math.Sqrt(
                 Math.Pow(MathHelper.Distance(a.X, b.X), 2) +
@@ -35,14 +33,11 @@ namespace Basic_Pathfinder
         //}
         public static GridNode LowestNode(this LinkedList<GridNode> nodes)
         {
-            var lowNode = nodes.First(); ;
+            var lowNode = nodes.First();
             foreach (var item in nodes)
                 if (item.FValue < lowNode.FValue)
                     lowNode = item;
             return lowNode;
         }
-        public static bool SameValues(this GridPoint a, GridPoint b) =>
-            a.Walkable && b.Walkable && a.Cordinates.X == b.Cordinates.X && a.Cordinates.Y == b.Cordinates.Y;
-        
     }
 }

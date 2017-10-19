@@ -32,3 +32,10 @@
 /processorParam:TextureFormat=Compressed
 /build:textStuff.spritefont
 
+#begin NodeSF.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:NodeSF.spritefont
+

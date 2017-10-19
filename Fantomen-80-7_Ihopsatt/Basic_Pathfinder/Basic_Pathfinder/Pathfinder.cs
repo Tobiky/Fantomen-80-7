@@ -15,82 +15,65 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Basic_Pathfinder
 {
-    public class Pathfinder
+    public static class Pathfinder
     {
-        Point start;
-        Point goal;
+        public static bool ReachedGoal { get; private set; }
 
-        int size;
-
-        LinkedList<GridNode> openLLGN;
-        LinkedList<GridNode> closedLLGN;
-
-        public int Size => size;
-        public LinkedList<GridNode> OpenLLGN => openLLGN;
-        public LinkedList<GridNode> ClosedLLGN => closedLLGN;
-
-        public Pathfinder(Point start, Point goal, int size)
+        public static LinkedList<GridNode> AStar(int size, LinkedList<GridNode> openLLGN, LinkedList<GridNode> closedLLGN)
         {
-            this.start = start;
-            this.goal = goal;
-            this.size = size;
-            openLLGN = new   LinkedList<GridNode>();
-            closedLLGN = new LinkedList<GridNode>();
-
-            openLLGN.AddLast(new GridNode(start));
-        }
-
-        public async Task<LinkedList<GridNode>> AStar()
-        {
-            var lockRef = new object();
-            while (openLLGN.Count != 0 && openLLGN != null)
-            {
+            ReachedGoal = false;
+            openLLGN.AddLast(new GridNode(WorldGeneration.Start));
+            Point goal = WorldGeneration.Goal;
+            while (openLLGN.Count != 0) {
                 var leastNode = openLLGN.LowestNode();
                 openLLGN.Remove(leastNode);
-                var successors = SuccessorNodes(leastNode).Result;
-                foreach (var successor in successors)
-                {
-                    if (successor.Location.Cordinates == goal)
-                    {
+                var successors = SuccessorNodes();
+                foreach (var successor in successors) {
+                    if (successor.Location == goal) {
                         closedLLGN.AddLast(leastNode);
+                        ReachedGoal = true;
                         return closedLLGN;
                     }
 
-                    Func<GridNode, bool> containsWhatever = node =>
-                        node.Location.Cordinates == successor.Location.Cordinates;
-
-                    if (openLLGN.Any(containsWhatever) || closedLLGN.Any(containsWhatever))
+                    bool containsNodeOfSameCordinates(GridNode node) => node.Location == successor.Location;
+                    if (openLLGN.Any(containsNodeOfSameCordinates) || closedLLGN.Any(containsNodeOfSameCordinates))
                         continue;
 
                     openLLGN.AddLast(successor);
                 }
                 closedLLGN.AddLast(leastNode);
+
+                GridNode[] SuccessorNodes()
+                {
+                    List<GridNode> nodes = new List<GridNode>(4);
+                    Point pos = leastNode.Location;
+                    int screenW = WorldGeneration.Screen.Width;
+                    int screenH = WorldGeneration.Screen.Height;
+                    LinkedList<Rectangle> obstacles = WorldGeneration.Obstacles;
+
+                    for (int i = -1; i < 2; i += 2) {   
+                        var yLocation = new Point(pos.X, pos.Y + i * size);
+                        var xLocation = new Point(pos.X + i * size, pos.Y);
+
+                        AddNodeIfWalkable(yLocation);
+                        AddNodeIfWalkable(xLocation);
+
+                        void AddNodeIfWalkable(Point loc)
+                        {
+                            if (loc == leastNode.Location)
+                                return;
+                            if (loc.X < 0 || loc.X >= screenW || loc.Y < 0 || loc.Y >= screenH)
+                                return;
+                            if (obstacles.Any(obs => obs.Contains(loc)))
+                                return;
+                            nodes.Add(new GridNode(leastNode, loc));
+                        };
+                    }
+                    return nodes.ToArray();
+                }
             }
+            ReachedGoal = false;
             return closedLLGN;
         }
-
-        private Task<GridNode[]> SuccessorNodes(GridNode parent)
-        {
-            //TODO: Fix this nasty ass shit
-            //-------------------------------------------------------------------------------------------------------------FIX---------------------------------------------------------------------
-            var tcs = new TaskCompletionSource<GridNode[]>();
-            List<GridNode> nodes = new List<GridNode>(4);
-            Point pos = parent.Location.Cordinates;
-            for (int i = -1; i < 2; i += 2)
-            {
-                var yLocation = new Point(pos.X, pos.Y + i * (size + 1));
-                var xLocation = new Point(pos.X + i * (size + 1), pos.Y);
-
-                Action<Point, bool> AddNode = (loc, walkable) => { if (walkable) nodes.Add(new GridNode(parent, loc, walkable)); };
-                Func<Point, bool> Walkable = loc =>
-                    !MapData.Screen.Contains(loc) || loc == parent.Location.Cordinates ? false : !MapData.Obstacles.Any(obs => obs.Contains(loc));
-
-                AddNode(yLocation, Walkable(yLocation));
-                AddNode(xLocation, Walkable(xLocation));
-            }
-            tcs.SetResult(nodes.ToArray());
-            return tcs.Task;
-        }
-
     }
 }

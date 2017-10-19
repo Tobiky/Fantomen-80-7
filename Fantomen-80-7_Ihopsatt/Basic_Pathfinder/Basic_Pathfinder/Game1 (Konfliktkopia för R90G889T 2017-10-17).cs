@@ -17,14 +17,12 @@ namespace Basic_Pathfinder
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         LinkedList<GridNode> pfPath;
+        const int size = 40;
 
         SpriteFont sf;
-        SpriteFont nodeSF;
-        bool showPathInfo = false;
-        bool showNodeInfo = false;
+        bool showInfo = false;
         int pathTime;
         int worldTime;
-        float keyDelay;
         //int lowerRight;
 
         //RenderTarget2D target;
@@ -35,10 +33,13 @@ namespace Basic_Pathfinder
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
+
+            //target = new RenderTarget2D(GraphicsDevice, MapData.Screen.Width, MapData.Screen.Height);
             IsMouseVisible = true;
+            //Window.AllowUserResizing = false;
             graphics.PreferredBackBufferHeight = 800;
             graphics.PreferredBackBufferWidth = 800;
-
+            MapData.Screen = new Rectangle(0, 0, 800, 800);
         }
 
         /// <summary>
@@ -60,7 +61,7 @@ namespace Basic_Pathfinder
                 var p = new Point(tempRand.Next(0, Window.ClientBounds.Right), tempRand.Next(0, Window.ClientBounds.Bottom));
                 if (p.X % 6 != 0 || p.Y % 6 != 0 || p == MapData.Goal)
                     continue;
-
+                
                 var r = new Rectangle(p, rSize);
                 if (new Random().Next(1, 101) <= 50) {
                     r.Size = new Point(17, 17);
@@ -69,8 +70,7 @@ namespace Basic_Pathfinder
                         continue;
                     }
 
-                }
-                else if (MapData.Obstacles.Any(obs => obs.Intersects(r)) || r.Contains(p)) {
+                } else if (MapData.Obstacles.Any(obs => obs.Intersects(r)) || r.Contains(p)) {
                     continue;
                 }
                 i++;
@@ -90,7 +90,7 @@ namespace Basic_Pathfinder
             openLLGN.Clear();
             closedLLGN.Clear();
 
-            pfPath = Pathfinder.AStar(WorldGeneration.NodeSize, openLLGN, closedLLGN);//.Result;
+            pfPath = Pathfinder.AStar(size, openLLGN, closedLLGN);//.Result;
             sw.Stop();
             pathTime = sw.Elapsed.Seconds;
         }
@@ -98,13 +98,9 @@ namespace Basic_Pathfinder
 
         protected override void Initialize()
         {
-            WorldGeneration.Screen = new Rectangle(0, 0, 800, 800);
-            WorldGeneration.NodeSize = 5;
-            //WorldGeneration.NumberOfObstacles = 400;
             WorldGeneration.Generate();
-            //GridNode.Weight = 5;
+
             PathFindAStar();
-            keyDelay = 0f;
 
             base.Initialize();
         }
@@ -119,7 +115,6 @@ namespace Basic_Pathfinder
             spriteBatch = new SpriteBatch(GraphicsDevice);
             WorldGeneration.TileTexture = Content.Load<Texture2D>("whitesquare");
             sf = Content.Load<SpriteFont>("textStuff");
-            nodeSF = Content.Load<SpriteFont>("NodeSF");
         }
 
         /// <summary>
@@ -128,7 +123,7 @@ namespace Basic_Pathfinder
         /// </summary>
         protected override void UnloadContent()
         {
-            Content.Unload();
+
         }
 
         /// <summary>
@@ -142,23 +137,16 @@ namespace Basic_Pathfinder
                 Exit();
 
             KeyboardState state = Keyboard.GetState();
-            if (keyDelay == 0f && state.IsKeyDown(Keys.Enter)) {
+            if (state.IsKeyDown(Keys.Enter)) {
                 int obG = GC.GetGeneration(WorldGeneration.Obstacles);
                 WorldGeneration.Obstacles.Clear();
                 GC.Collect(obG);
                 WorldGeneration.Generate();
                 PathFindAStar();
-                keyDelay = 100f;
             }
-            if (keyDelay == 0f && state.IsKeyDown(Keys.F11)) {
-                showPathInfo = !showPathInfo;
-                keyDelay = 100f;
-            }
-            if (keyDelay == 0f && state.IsKeyDown(Keys.F10)) {
-                showNodeInfo = !showNodeInfo;
-                keyDelay = 100f;
-            }
-            keyDelay -= gameTime.ElapsedGameTime.Milliseconds > keyDelay ? keyDelay : gameTime.ElapsedGameTime.Milliseconds;
+            if (state.IsKeyDown(Keys.F11))
+                showInfo = !showInfo;
+
             base.Update(gameTime);
         }
 
@@ -174,31 +162,22 @@ namespace Basic_Pathfinder
 
             spriteBatch.Begin();
             string times = "";
-            if (showPathInfo)
-                times = $"PathTime: {pathTime}s\nWorldTime: {worldTime}\nOpenLLGN: {openLLGN.Count}\nClosedLLGN: {closedLLGN.Count}\nReachedGoal: {Pathfinder.ReachedGoal}\n" +
-                    $"NodeSize: {WorldGeneration.NodeSize}\nObstacleCount: {WorldGeneration.NumberOfObstacles}";
+            if (showInfo)
+                times += $"PathTime:{pathTime}s\nWorldTime:{worldTime}\nOpenLLGN:{openLLGN.Count}\nClosedLLGN:{closedLLGN.Count}";
 
-            void DrawNodeInfo(GridNode node) =>
-                spriteBatch.DrawString(
-                    nodeSF,
-                    $"X:{node.LocationNodeScaled.X}\nY:{node.LocationNodeScaled.Y}",
-                    node.Location.ToVector2(),
-                    Color.Red);
+            foreach (var node in openLLGN)
+                spriteBatch.Draw(WorldGeneration.TileTexture, new Rectangle(node.Location, new Point(size, size)), Color.Gray);
 
-            void DrawListConditional(LinkedList<GridNode> list, Color listNodeColor, Action<GridNode> drawData, bool drawDataIf)
-            {
-                foreach(var node in list) {
-                    spriteBatch.Draw(WorldGeneration.TileTexture, new Rectangle(node.Location, new Point(WorldGeneration.NodeSize, WorldGeneration.NodeSize)), listNodeColor);
-                    if (drawDataIf)
-                        drawData(node);
-                }
-            }
+            foreach (var node in closedLLGN)
+                spriteBatch.Draw(WorldGeneration.TileTexture, new Rectangle(node.Location, new Point(size, size)), Color.LightGray);
 
-            DrawListConditional(openLLGN, Color.Gray, DrawNodeInfo, showNodeInfo);
-            DrawListConditional(closedLLGN, Color.LightGray, DrawNodeInfo, showNodeInfo);
-            DrawListConditional(Path(pfPath), Color.White, node => { }, false);
+            LinkedList<GridNode> path = Path(pfPath);
+            foreach (var node in path)
+                spriteBatch.Draw(WorldGeneration.TileTexture, new Rectangle(node.Location, new Point(size, size)), Color.White);
 
-            WorldGeneration.DrawWorld(spriteBatch);
+            WorldGeneration.DrawObstacles(spriteBatch);
+
+            WorldGeneration.DrawStartGoal(spriteBatch);
 
             if (!string.IsNullOrEmpty(times))
                 spriteBatch.DrawString(sf, times, new Vector2(6, 6), Color.Red);
@@ -218,6 +197,12 @@ namespace Basic_Pathfinder
                 nodeToCheck = nodeToCheck.Parrent;
             }
             return path;
+        }
+
+        private void Testm()
+        {
+
+
         }
     }
 }
