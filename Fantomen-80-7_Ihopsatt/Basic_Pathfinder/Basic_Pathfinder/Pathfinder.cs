@@ -49,7 +49,7 @@ namespace Basic_Pathfinder
                     Point pos = leastNode.Location;
                     int screenW = WorldGeneration.Screen.Width;
                     int screenH = WorldGeneration.Screen.Height;
-                    LinkedList<Rectangle> obstacles = WorldGeneration.Obstacles;
+                    LinkedList<Obstacle> obstacles = WorldGeneration.Obstacles;
 
                     for (int i = -1; i < 2; i += 2) {   
                         var yLocation = new Point(pos.X, pos.Y + i * size);
@@ -64,7 +64,7 @@ namespace Basic_Pathfinder
                                 return;
                             if (loc.X < 0 || loc.X >= screenW || loc.Y < 0 || loc.Y >= screenH)
                                 return;
-                            if (obstacles.Any(obs => obs.Contains(loc)))
+                            if (obstacles.Any(obs => obs.ObstacleArea.Contains(loc)))
                                 return;
                             nodes.Add(new GridNode(leastNode, loc));
                         };

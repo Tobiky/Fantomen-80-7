@@ -50,8 +50,4 @@ namespace Basic_Pathfinder
         public static implicit operator Rectangle(Obstacle obs) =>
             obs.ObstacleArea;
     }
-    class Test
-    {
-        Obstacle o = new Obstacle();
-    }
 }
