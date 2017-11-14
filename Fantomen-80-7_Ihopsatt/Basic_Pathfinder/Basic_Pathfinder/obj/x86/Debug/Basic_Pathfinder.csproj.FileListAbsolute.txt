@@ -43,7 +43,6 @@ C:\Users\andreaseric.hammars\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfind
 C:\Users\andreaseric.hammars\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\bin\Windows\x86\Debug\SharpDX.Direct2D1.xml
 C:\Users\andreaseric.hammars\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\bin\Windows\x86\Debug\SharpDX.XInput.xml
 C:\Users\andreaseric.hammars\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\bin\Windows\x86\Debug\SharpDX.Direct3D9.xml
-C:\Users\andreaseric.hammars\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\obj\x86\Debug\Basic_Pathfinder.csprojResolveAssemblyReference.cache
 C:\Users\andreaseric.hammars\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\obj\x86\Debug\Basic_Pathfinder.csproj.CoreCompileInputs.cache
 C:\Users\andreaseric.hammars\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\obj\x86\Debug\Basic_Pathfinder.exe
 C:\Users\andreaseric.hammars\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\obj\x86\Debug\Basic_Pathfinder.pdb
@@ -76,3 +75,15 @@ D:\dev\Andreas\Fantomen-80-7-master\Fantomen-80-7_Ihopsatt\Basic_Pathfinder\Basi
 D:\dev\Andreas\Fantomen-80-7-master\Fantomen-80-7_Ihopsatt\Basic_Pathfinder\Basic_Pathfinder\bin\Windows\x86\Debug\SharpDX.XInput.xml
 D:\dev\Andreas\Fantomen-80-7-master\Fantomen-80-7_Ihopsatt\Basic_Pathfinder\Basic_Pathfinder\bin\Windows\x86\Debug\SharpDX.Direct3D9.xml
 C:\Users\Andreas\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\bin\Windows\x86\Debug\Content\NodeSF.xnb
+C:\Users\andreaseric.hammars\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\bin\Windows\x86\Debug\Content\NodeSF.xnb
+C:\Users\Andreas\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\bin\Windows\x86\Debug\Google.Protobuf.dll
+C:\Users\Andreas\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\bin\Windows\x86\Debug\Google.Protobuf.xml
+C:\Users\Andreas\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\obj\x86\Debug\Basic_Pathfinder.csproj.GenerateResource.Cache
+C:\Users\andreaseric.hammars\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\bin\Windows\x86\Debug\Google.Protobuf.dll
+C:\Users\andreaseric.hammars\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\bin\Windows\x86\Debug\Google.Protobuf.xml
+C:\Users\andreaseric.hammars\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\obj\x86\Debug\Basic_Pathfinder.csproj.GenerateResource.Cache
+C:\Users\andreaseric.hammars\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\obj\x86\Debug\Basic_Pathfinder.PreFab.PreFabLoader.resources
+C:\Users\andreaseric.hammars\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\obj\x86\Debug\Basic_Pathfinder.PreFab.PreFabSaver.resources
+C:\Users\Andreas\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\obj\x86\Debug\Basic_Pathfinder.PreFab.PreFabLoader.resources
+C:\Users\Andreas\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\obj\x86\Debug\Basic_Pathfinder.PreFab.PreFabSaver.resources
+C:\Users\andreaseric.hammars\Dropbox\Program\Gym_Proj\Pathfinding\Basic_Pathfinder\Basic_Pathfinder\obj\x86\Debug\Basic_Pathfinder.csprojResolveAssemblyReference.cache

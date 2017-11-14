@@ -1,0 +1,16 @@
+﻿syntax = "proto3";
+option  csharp_namespace = "Basic_Pathfinder.PreFab";
+
+message Location {
+	int32 x = 1;
+	int32 y = 2;
+}
+message Obs{
+	Location pos = 1;
+}
+message PreFab{
+	int32 nodeSize = 1;
+	Location startingPoint = 2;
+	Location goalPoint = 3;
+	repeated Obs prefab = 4;
+}
