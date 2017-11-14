@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <SourceFile>C:/Users/Andreas/Dropbox/Program/Gym_Proj/Pathfinding/Basic_Pathfinder/Basic_Pathfinder/Content/textStuff.spritefont</SourceFile>
-  <SourceTime>2017-10-14T06:02:04+02:00</SourceTime>
-  <DestFile>C:/Users/Andreas/Dropbox/Program/Gym_Proj/Pathfinding/Basic_Pathfinder/Basic_Pathfinder/Content/bin/Windows/textStuff.xnb</DestFile>
-  <DestTime>2017-10-17T21:09:19.4869742+02:00</DestTime>
+  <SourceFile>C:/Users/andreaseric.hammars/Dropbox/Program/Gym_Proj/Pathfinding/Basic_Pathfinder/Basic_Pathfinder/Content/textStuff.spritefont</SourceFile>
+  <SourceTime>2017-03-01T16:05:30+01:00</SourceTime>
+  <DestFile>C:/Users/andreaseric.hammars/Dropbox/Program/Gym_Proj/Pathfinding/Basic_Pathfinder/Basic_Pathfinder/Content/bin/Windows/textStuff.xnb</DestFile>
+  <DestTime>2017-11-14T08:06:33.2119262+01:00</DestTime>
   <Importer>FontDescriptionImporter</Importer>
   <ImporterTime>2017-03-01T16:05:36+01:00</ImporterTime>
   <Processor>FontDescriptionProcessor</Processor>
