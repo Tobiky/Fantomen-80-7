@@ -23,14 +23,6 @@ namespace Basic_Pathfinder
                 Math.Pow(MathHelper.Distance(a.X, b.X), 2) +
                 Math.Pow(MathHelper.Distance(a.Y, b.Y), 2)
                 );
-        //public static GridNode LowestNode(this GridNode[] nodes)
-        //{
-        //    var lowNode = nodes[0];
-        //    foreach (var item in nodes)
-        //        if (item.FValue < lowNode.FValue)
-        //            lowNode = item;
-        //    return lowNode;
-        //}
         public static GridNode LowestNode(this LinkedList<GridNode> nodes)
         {
             var lowNode = nodes.First();
@@ -39,5 +31,24 @@ namespace Basic_Pathfinder
                     lowNode = item;
             return lowNode;
         }
+        public static int IndexOf<T>(this LinkedList<T> list, T item)
+        {
+            var count = 0;
+            for (var node = list.First; node != null; node = node.Next, count++) {
+                if (item.Equals(node.Value))
+                    return count;
+            }
+            return -1;
+        }
+        public static int IndexOf(this LinkedList<GridNode> list, Point item)
+        {
+            var count = 0;
+            for (var node = list.First; node != null; node = node.Next, count++) {
+                if (node.Value.Location == item)
+                    return count;
+            }
+            return -1;
+        }
+        public static Point ScalePoint(this Point p) => new Point(p.X/WorldGeneration.NodeSize, p.Y/WorldGeneration.NodeSize);
     }
 }

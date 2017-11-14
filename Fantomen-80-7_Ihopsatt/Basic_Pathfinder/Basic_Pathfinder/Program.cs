@@ -16,8 +16,6 @@ namespace Basic_Pathfinder
         {
             using (var game = new Game1())
                 game.Run();
-            
-
         }
     }
 #endif

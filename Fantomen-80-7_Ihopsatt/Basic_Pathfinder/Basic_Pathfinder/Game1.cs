@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -22,9 +23,13 @@ namespace Basic_Pathfinder
         SpriteFont nodeSF;
         bool showPathInfo = false;
         bool showNodeInfo = false;
+        bool showInvalidPath = false;
         int pathTime;
-        int worldTime;
         float keyDelay;
+
+        PreFab.PreFabLoader pfLoader;
+        PreFab.PreFabSaver pfSaver;
+
         //int lowerRight;
 
         //RenderTarget2D target;
@@ -39,6 +44,11 @@ namespace Basic_Pathfinder
             graphics.PreferredBackBufferHeight = 800;
             graphics.PreferredBackBufferWidth = 800;
 
+            string directory = Directory.GetCurrentDirectory() + "//PreFabs";
+            if (!Directory.GetCurrentDirectory().EndsWith("PreFabs")) {
+                Directory.CreateDirectory(directory);
+                Directory.SetCurrentDirectory(directory);
+            }
         }
 
         /// <summary>
@@ -47,50 +57,17 @@ namespace Basic_Pathfinder
         /// related content.  Calling base.Initialize will enumerate through any components
         /// and initialize them as well.
         /// </summary>
-        private void GenerateWorld()
-        {
-            var sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
-            var tempRand = new Random();
-            int tempInt = Window.ClientBounds.Bottom / tempRand.Next(1, Window.ClientBounds.Right / tempRand.Next(1, Window.ClientBounds.Bottom));
-            var rSize = new Point(5, 5);
-
-            for (int i = 0; i < tempInt; i++) {
-                i--;
-                var p = new Point(tempRand.Next(0, Window.ClientBounds.Right), tempRand.Next(0, Window.ClientBounds.Bottom));
-                if (p.X % 6 != 0 || p.Y % 6 != 0 || p == MapData.Goal)
-                    continue;
-
-                var r = new Rectangle(p, rSize);
-                if (new Random().Next(1, 101) <= 50) {
-                    r.Size = new Point(17, 17);
-
-                    if (r.Contains(MapData.Goal) || r.Contains(MapData.Start)) {
-                        continue;
-                    }
-
-                }
-                else if (MapData.Obstacles.Any(obs => obs.Intersects(r)) || r.Contains(p)) {
-                    continue;
-                }
-                i++;
-
-                MapData.Obstacles.AddLast(r);
-            }
-            sw.Stop();
-            worldTime = sw.Elapsed.Seconds;
-        }
 
         LinkedList<GridNode> openLLGN = new LinkedList<GridNode>();
         LinkedList<GridNode> closedLLGN = new LinkedList<GridNode>();
-        void PathFindAStar()
+        public void PathFindAStar()
         {
             var sw = new System.Diagnostics.Stopwatch();
             sw.Start();
             openLLGN.Clear();
             closedLLGN.Clear();
-
-            pfPath = Pathfinder.AStar(WorldGeneration.NodeSize, openLLGN, closedLLGN);//.Result;
+            Pathfinder.Pathfind(this, WorldGeneration.NodeSize, openLLGN, closedLLGN);
+            pfPath = Pathfinder.Path; //.Result;
             sw.Stop();
             pathTime = sw.Elapsed.Seconds;
         }
@@ -99,13 +76,12 @@ namespace Basic_Pathfinder
         protected override void Initialize()
         {
             WorldGeneration.Screen = new Rectangle(0, 0, 800, 800);
-            WorldGeneration.NodeSize = 5;
-            //WorldGeneration.NumberOfObstacles = 400;
+            WorldGeneration.NodeSize = 80;
+            WorldGeneration.WorldGenerationType = WorldGenType.Random;
             WorldGeneration.Generate();
             //GridNode.Weight = 5;
             PathFindAStar();
             keyDelay = 0f;
-
             base.Initialize();
         }
 
@@ -142,27 +118,34 @@ namespace Basic_Pathfinder
                 Exit();
 
             KeyboardState state = Keyboard.GetState();
-            if (keyDelay == 0f && state.IsKeyDown(Keys.Enter)) {
-                int obG = GC.GetGeneration(WorldGeneration.Obstacles);
-                WorldGeneration.Obstacles.Clear();
-                GC.Collect(obG);
-                WorldGeneration.Generate();
-                PathFindAStar();
-                keyDelay = 100f;
-            }
-            if (keyDelay == 0f && state.IsKeyDown(Keys.F11)) {
-                showPathInfo = !showPathInfo;
-                keyDelay = 100f;
-            }
-            if (keyDelay == 0f && state.IsKeyDown(Keys.F10)) {
-                showNodeInfo = !showNodeInfo;
-                keyDelay = 100f;
+            if (IsActive) {
+                if (keyDelay == 0f) {
+                    if (state.IsKeyDown(Keys.R)) {
+                        WorldGeneration.Generate();
+                        PathFindAStar();
+                    }
+                    else if (state.IsKeyDown(Keys.F11))
+                        showPathInfo = !showPathInfo;
+                    else if (state.IsKeyDown(Keys.F10))
+                        showNodeInfo = !showNodeInfo;
+                    else if (state.IsKeyDown(Keys.F9))
+                        showInvalidPath = !showInvalidPath;
+                    keyDelay = 100f;
+                }
+                if (state.IsKeyDown(Keys.LeftControl)) {
+                    if (state.IsKeyDown(Keys.L)) {
+                        pfLoader = new PreFab.PreFabLoader();
+                        pfLoader.Show();
+                    }
+                    else if (state.IsKeyDown(Keys.S)) {
+                        pfSaver = new PreFab.PreFabSaver();
+                        pfSaver.Show();
+                    }
+                }
             }
             keyDelay -= gameTime.ElapsedGameTime.Milliseconds > keyDelay ? keyDelay : gameTime.ElapsedGameTime.Milliseconds;
             base.Update(gameTime);
         }
-
-
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -175,8 +158,9 @@ namespace Basic_Pathfinder
             spriteBatch.Begin();
             string times = "";
             if (showPathInfo)
-                times = $"PathTime: {pathTime}s\nWorldTime: {worldTime}\nOpenLLGN: {openLLGN.Count}\nClosedLLGN: {closedLLGN.Count}\nReachedGoal: {Pathfinder.ReachedGoal}\n" +
-                    $"NodeSize: {WorldGeneration.NodeSize}\nObstacleCount: {WorldGeneration.NumberOfObstacles}";
+                times = $"PathTime: {pathTime}s\nOpenLLGN: {openLLGN.Count}\nClosedLLGN: {closedLLGN.Count}\nReachedGoal: {Pathfinder.ReachedGoal}\n" +
+                    $"NodeSize: {WorldGeneration.NodeSize}\nObstacleCount: {WorldGeneration.NumberOfObstacles}\n\nStart: {WorldGeneration.Start.ScalePoint()}\n" +
+                    $"Goal: {WorldGeneration.Goal.ScalePoint()}";
 
             void DrawNodeInfo(GridNode node) =>
                 spriteBatch.DrawString(
@@ -187,7 +171,7 @@ namespace Basic_Pathfinder
 
             void DrawListConditional(LinkedList<GridNode> list, Color listNodeColor, Action<GridNode> drawData, bool drawDataIf)
             {
-                foreach(var node in list) {
+                foreach (var node in list) {
                     spriteBatch.Draw(WorldGeneration.TileTexture, new Rectangle(node.Location, new Point(WorldGeneration.NodeSize, WorldGeneration.NodeSize)), listNodeColor);
                     if (drawDataIf)
                         drawData(node);
@@ -196,9 +180,13 @@ namespace Basic_Pathfinder
 
             DrawListConditional(openLLGN, Color.Gray, DrawNodeInfo, showNodeInfo);
             DrawListConditional(closedLLGN, Color.LightGray, DrawNodeInfo, showNodeInfo);
-            DrawListConditional(Path(pfPath), Color.White, node => { }, false);
-
+            DrawListConditional(pfPath, Color.White, node => { }, false);
             WorldGeneration.DrawWorld(spriteBatch);
+            if (showInvalidPath) {
+                DrawListConditional(Pathfinder.InvalidNodes, Color.DarkRed, node => { }, false);
+                DrawListConditional(Pathfinder.ChildStartGoals, Color.Magenta, node => { }, false);
+            }
+
 
             if (!string.IsNullOrEmpty(times))
                 spriteBatch.DrawString(sf, times, new Vector2(6, 6), Color.Red);
@@ -207,17 +195,6 @@ namespace Basic_Pathfinder
             spriteBatch.End();
 
             base.Draw(gameTime);
-        }
-
-        private LinkedList<GridNode> Path(LinkedList<GridNode> closedList)
-        {
-            var path = new LinkedList<GridNode>();
-            var nodeToCheck = closedList.Last();
-            while (nodeToCheck.HasParent) {
-                path.AddFirst(nodeToCheck);
-                nodeToCheck = nodeToCheck.Parrent;
-            }
-            return path;
         }
     }
 }

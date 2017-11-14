@@ -26,16 +26,26 @@ namespace Basic_Pathfinder
             ObstacleArea = area;
             Risk = risk;
         }
-        public Obstacle(Point location, Point size, double risk) :
-            this(new Rectangle(location, size), risk){ }
-        public Obstacle(int x, int y, int width, int heigh, double risk) :
-            this(new Rectangle(x, y, width, heigh), risk){ }
-        public Obstacle(Rectangle area) :
-            this(area, 0){ }
-        public Obstacle(Point location, Point size) :
-            this(location, size, 0){ }
-        public Obstacle(int x, int y, int width, int height) :
-            this(x, y, width, height, 0){ }
+        public Obstacle(Point location, Point size, double risk) 
+            : this(new Rectangle(location, size), risk)
+        { }
+        public Obstacle(int x, int y, int width, int heigh, double risk) 
+            : this(new Rectangle(x, y, width, heigh), risk)
+        { }
+        public Obstacle(Rectangle area) 
+            : this(area, 0)
+        { }
+        public Obstacle(Point location, Point size) 
+            : this(location, size, 0)
+        { }
+        public Obstacle(int x, int y, int width, int height) 
+            : this(x, y, width, height, 0){ }
+        public Obstacle(Point location) 
+            : this(location, new Point(WorldGeneration.NodeSize))
+        { }
+        public Obstacle(Obstacle other) 
+            : this(other.ObstacleArea, other.Risk)
+        { }
 
         private static double MergeRisk(params double[] riskValues)
         {
@@ -49,5 +59,8 @@ namespace Basic_Pathfinder
             new Obstacle(rect);
         public static implicit operator Rectangle(Obstacle obs) =>
             obs.ObstacleArea;
+        //                           to Obstacle from Point
+        public static implicit operator Obstacle(Point loc) => new Obstacle(loc);
+        public static implicit operator Obstacle(PreFab.Obs obst) => new Obstacle(obst.Pos);
     }
 }
